@@ -3,8 +3,9 @@ from torch import nn
 import torchvision
 from torchvision import datasets
 from torchvision.transforms import ToTensor
-import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
+
+torch.manual_seed(42)
 
 train_data = datasets.FashionMNIST(
     root="data",
@@ -15,11 +16,9 @@ train_data = datasets.FashionMNIST(
 )
 
 def accuracy_fn(y_true: torch.Tensor, y_pred: torch.Tensor):
-    """y_pred is expected to be label indices, not logits."""
     correct = (y_true == y_pred).sum().item()
     total = len(y_true)
     return (correct / total) * 100
-
 
 test_data = datasets.FashionMNIST(
     root="data",
@@ -27,19 +26,12 @@ test_data = datasets.FashionMNIST(
     download=True,
     transform=ToTensor()
 )
-class_names = train_data.classes
-
 
 BATCH_SIZE = 32
+class_names = train_data.classes
 train_dataloader = DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True)
 test_dataloader = DataLoader(test_data, batch_size=BATCH_SIZE,shuffle=False)
-train_features_batch, train_labels_batch = next(iter(train_dataloader))
-flatten_model = nn.Flatten() 
-x = train_features_batch[0]
-
-output = flatten_model(x) 
 loss_fn = nn.CrossEntropyLoss()
-
 
 def eval_model(model, dataloader, loss_fn, accuracy_fn):
   loss, acc = 0, 0
@@ -119,7 +111,6 @@ loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(params=model_2.parameters(),lr=0.1)
 
 epochs = 10
-torch.manual_seed(42)
 
 for epoch in range(epochs):
   print(f"Epoch: {epoch}\n---------")
