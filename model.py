@@ -1,10 +1,8 @@
 import torch
 from torch import nn
-
 import torchvision
 from torchvision import datasets
 from torchvision.transforms import ToTensor
-
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 
@@ -15,6 +13,13 @@ train_data = datasets.FashionMNIST(
     transform=ToTensor(),
     target_transform=None
 )
+
+def accuracy_fn(y_true: torch.Tensor, y_pred: torch.Tensor):
+    """y_pred is expected to be label indices, not logits."""
+    correct = (y_true == y_pred).sum().item()
+    total = len(y_true)
+    return (correct / total) * 100
+
 
 test_data = datasets.FashionMNIST(
     root="data",
@@ -36,7 +41,6 @@ output = flatten_model(x)
 loss_fn = nn.CrossEntropyLoss()
 
 
-torch.manual_seed(26)
 def eval_model(model, dataloader, loss_fn, accuracy_fn):
   loss, acc = 0, 0
   model.eval()
@@ -51,11 +55,6 @@ def eval_model(model, dataloader, loss_fn, accuracy_fn):
   return {"model_name": model.__class__.__name__,
             "model_loss": loss.item(),
             "model_acc": acc}
-
-model_0_results = eval_model(model=model_0, dataloader=test_dataloader,
-    loss_fn=loss_fn, accuracy_fn=accuracy_fn
-)
-model_0_results
 
 def train_step(model, dataloader, loss_fn, optimizer, accuracy_fn):
   train_loss, train_acc = 0, 0
@@ -115,11 +114,9 @@ class FashionClassifierV2(nn.Module):
     X = self.classifier(X)
     return X
 
-torch.manual_seed(26)
 model_2 = FashionClassifierV2(1, 10, len(class_names))
 loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(params=model_2.parameters(),lr=0.1)
-
 
 epochs = 10
 torch.manual_seed(42)
@@ -130,4 +127,4 @@ for epoch in range(epochs):
   eval_step(model_2, test_dataloader, loss_fn, accuracy_fn)
 
 model2_results = eval_model(model_2, test_dataloader, loss_fn, accuracy_fn)
-model2_results
+print(model2_results)
